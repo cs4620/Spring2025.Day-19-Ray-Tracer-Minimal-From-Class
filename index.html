@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Ray Tracer 1.0</title>
+</head>
+
+<body>
+    <canvas id="canv"></canvas>
+    <script>
+        let canvas = document.querySelector("#canv")
+        canvas.width = 640
+        canvas.height = 640
+        let ctx = canvas.getContext("2d")
+
+        const x = 0, y = 1, z = 2
+
+        function add(p1, p2) { return [p1[x] + p2[x], p1[y] + p2[y], p1[z] + p2[z]] }
+        function minus(p1, p2) { return [p2[x] - p1[x], p2[y] - p1[y], p2[z] - p1[z]] }
+        function dot(p1, p2) { return p2[x] * p1[x] + p2[y] * p1[y] + p2[z] * p1[z] }
+        function cross(p1, p2) {
+            return [
+                p1[y] * p2[z] - p1[z] * p2[y],
+                p1[z] * p2[x] - p1[x] * p2[z],
+                p1[x] * p2[y] - p1[y] * p2[x],
+            ]
+        }
+        function scale(p, s) { return [p[x] * s, p[y] * s, p[z] * s] }
+        function length(p) { return Math.sqrt(p[x] ** 2 + p[y] ** 2 + p[z] ** 2) }
+        function normalize(p) { return [p[x] / length(p), p[y] / length(p), p[z] / length(p)] }
+
+        const triangle = [
+            [-1, -1, -1],
+            [-1, 1, -1],
+            [1, 1, -1]
+        ]
+
+
+        for (let px = 0; px < 640; px++) {
+            for (let py = 0; py < 640; py++) {
+                //Part 1: Find the R and O
+                let x3 = px / 640 * 2 - 1
+                let y3 = py / 640 * 2 - 1
+                let p = [x3, y3, -1]
+                let O = [0, 0, 0]
+                let R = normalize(minus(O, p))
+
+                //Part 2: Ray Plane Intersection
+                let N = [0, 0, 1]
+                let D = -dot(N, triangle[0])
+                let T = (-D - dot(N, O)) / (dot(N, R))
+                let P = add(O, scale(R, T))
+
+                //Part 3: Triangle inside test
+                let v0 = minus(triangle[1], triangle[0])
+                let v1 = minus(triangle[2], triangle[1])
+                let v2 = minus(triangle[0], triangle[2])
+
+                let p0 = minus(P, triangle[0])
+                let p1 = minus(P, triangle[1])
+                let p2 = minus(P, triangle[2])
+
+                let c0 = cross(p0, v0)
+                let c1 = cross(p1, v1)
+                let c2 = cross(p2, v2)
+
+                if(c0[z] >= 0 &&c1[z] >=0&& c2[z]>=0){
+                    //Collision
+                    ctx.fillStyle = "rgb(255, 0, 0)"
+                    ctx.fillRect(px, py, 1, 1)
+                }
+                else{
+                    ctx.fillStyle = "rgb(0, 0, 0)"
+                    ctx.fillRect(px, py, 1, 1)
+                }
+
+            }
+        }
+    </script>
+</body>
+
+</html>
